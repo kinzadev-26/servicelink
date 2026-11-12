@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* ServiceLink theme: deep purple sidebar, lavender pills, white rounded cards.
+   Change a colour here and the whole app follows. */
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #f5f2fd;
+  --color-brand-100: #ebe5fb;
+  --color-brand-200: #d9cdf7;
+  --color-brand-300: #bba7ef;
+  --color-brand-500: #6a43d4;
+  --color-brand-600: #5429bb;
+  --color-brand-700: #40189d; /* sidebar and primary buttons */
+  --color-brand-800: #33127f;
+  --color-brand-900: #230b5a;
+
+  --color-page: #f4f2fa;      /* page background, also the colour of the active sidebar item */
+  --color-ink: #1f1b2e;
+  --color-muted: #7b7791;
+}
+
+@layer base {
+  body {
+    @apply bg-page font-sans text-ink antialiased;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl bg-white shadow-[0_4px_24px_rgba(64,24,157,0.07)];
+  }
+  .field {
+    @apply w-full rounded-xl border border-brand-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-200;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-brand-200 bg-white px-4 py-2.5 text-sm font-medium text-brand-700 transition hover:bg-brand-50;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-4 py-1.5 text-sm font-medium text-brand-600 transition hover:bg-brand-200;
+  }
+  .pill-active {
+    @apply bg-brand-700 text-white hover:bg-brand-800;
+  }
+  .icon-btn {
+    @apply relative grid h-10 w-10 place-items-center rounded-full bg-brand-50 text-brand-700 transition hover:bg-brand-100;
+  }
+}
+
+/* The active sidebar item: a page-coloured tab whose top and bottom corners curve
+   back into the purple sidebar. The two pseudo-elements draw those curves. */
+.nav-notch {
+  background: var(--color-page);
+  color: var(--color-brand-700);
+  font-weight: 600;
+}
+.nav-notch::before,
+.nav-notch::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+.nav-notch::before {
+  top: -20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 10px 10px 0 10px var(--color-page);
+}
+.nav-notch::after {
+  bottom: -20px;
+  border-top-right-radius: 20px;
+  box-shadow: 10px -10px 0 10px var(--color-page);
+}
