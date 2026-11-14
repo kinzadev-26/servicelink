@@ -12,9 +12,8 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
-// Security and parsing middleware (see section 7 of the design document)
 app.use(helmet());
-app.use(cors({ origin: env.clientUrl }));
+app.use(cors({ origin: env.clientUrl}));
 app.use(express.json({ limit: '10kb' }));
 app.use(mongoSanitize());
 if (env.nodeEnv !== 'test') app.use(morgan('dev'));
