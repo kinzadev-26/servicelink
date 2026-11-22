@@ -9,12 +9,12 @@ const ruleSchema = new mongoose.Schema(
   { _id: false }
 );
 
-// Used from Week 3 (slot generation). The model exists now so the database matches the design.
+// Weekly working hours, days off and slot length. getFreeSlots() in slotService turns this into bookable slots.
 const availabilitySchema = new mongoose.Schema(
   {
     provider: { type: mongoose.Schema.Types.ObjectId, ref: 'Provider', required: true, unique: true },
     weekly: [ruleSchema],
-    slotMinutes: { type: Number, enum: [30, 60, 90, 120], default: 60 },
+    slotMinutes: { type: Number, enum: [30, 45, 60, 90, 120, 180], default: 60 },
     daysOff: [{ type: String, match: /^\d{4}-\d{2}-\d{2}$/ }],
   },
   { timestamps: true }

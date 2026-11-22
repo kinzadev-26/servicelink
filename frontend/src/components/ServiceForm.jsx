@@ -5,13 +5,11 @@ import Loader from './Loader.jsx';
 import ErrorMessage from './ErrorMessage.jsx';
 import { useFetch } from '../hooks/useFetch.js';
 import { getCategories } from '../services/categoryService.js';
-import { getProviders } from '../services/providerService.js';
 import { getErrorMessage, getFieldErrors } from '../services/api.js';
 
 // Browser-side checks. The server repeats them (SYS-2); never trust only the browser.
-function validate(values, needsProvider) {
+function validate(values) {
   const errors = {};
-  if (needsProvider && !values.provider) errors.provider = 'Pick a provider';
   if (!values.category) errors.category = 'Pick a category';
   if (values.title.trim().length < 3 || values.title.trim().length > 80) errors.title = 'Title must be 3 to 80 characters';
   if (!/^\d+$/.test(String(values.price)) || Number(values.price) < 1) errors.price = 'Price must be a whole number of 1 or more';
@@ -22,10 +20,9 @@ function validate(values, needsProvider) {
 }
 
 // Used by both "Add a service" and "Edit service".
-// Week 3: remove the provider picker; the server reads the provider from the JWT.
-export default function ServiceForm({ initial, showProviderPicker, submitLabel, onSubmit }) {
+// The server reads the provider from the JWT, so the form has no provider field.
+export default function ServiceForm({ initial, submitLabel, onSubmit }) {
   const [values, setValues] = useState({
-    provider: '',
     category: '',
     title: '',
     description: '',
@@ -38,14 +35,13 @@ export default function ServiceForm({ initial, showProviderPicker, submitLabel, 
   const [submitting, setSubmitting] = useState(false);
 
   const categories = useFetch(getCategories);
-  const providers = useFetch(() => (showProviderPicker ? getProviders({ limit: 50 }) : Promise.resolve({ data: [] })), [showProviderPicker]);
 
   const change = (e) => setValues((v) => ({ ...v, [e.target.name]: e.target.value }));
 
   async function handleSubmit(e) {
     e.preventDefault();
     setServerError('');
-    const found = validate(values, showProviderPicker);
+    const found = validate(values);
     setErrors(found);
     if (Object.keys(found).length > 0) return;
 
@@ -60,22 +56,12 @@ export default function ServiceForm({ initial, showProviderPicker, submitLabel, 
     }
   }
 
-  if (categories.loading || providers.loading) return <Loader />;
+  if (categories.loading) return <Loader />;
   if (categories.error) return <ErrorMessage message={categories.error} onRetry={categories.refetch} />;
-  if (providers.error) return <ErrorMessage message={providers.error} onRetry={providers.refetch} />;
 
   return (
     <form onSubmit={handleSubmit} noValidate className="card space-y-4 p-6">
       {serverError && <ErrorMessage message={serverError} />}
-
-      {showProviderPicker && (
-        <FormInput as="select" label="Provider (temporary until login exists)" name="provider" value={values.provider} onChange={change} error={errors.provider}>
-          <option value="">Choose a provider</option>
-          {providers.data.map((p) => (
-            <option key={p._id} value={p._id}>{p.user?.name} ({p.city})</option>
-          ))}
-        </FormInput>
-      )}
 
       <FormInput as="select" label="Category" name="category" value={values.category} onChange={change} error={errors.category}>
         <option value="">Choose a category</option>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
+import Toast from './Toast.jsx';
 import Topbar from './Topbar.jsx';
 
 export default function Layout() {
@@ -21,6 +22,7 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      <Toast />
     </div>
   );
 }

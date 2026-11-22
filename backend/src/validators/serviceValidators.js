@@ -12,10 +12,7 @@ const shared = (required) => {
   ];
 };
 
-// Week 2 shortcut: the provider id comes from the body. Week 3 replaces it with req.user.
-export const createServiceRules = [
-  body('provider').isMongoId().withMessage('Pick a valid provider'),
-  ...shared(true),
-];
+// The provider comes from the login token (req.provider), never from the request body.
+export const createServiceRules = shared(true);
 
 export const updateServiceRules = shared(false);

@@ -17,7 +17,14 @@ const bookingSchema = new mongoose.Schema(
     },
     address: { type: String, trim: true, maxlength: 200 },
     notes: { type: String, trim: true, maxlength: 300 },
+    statusReason: { type: String, trim: true, maxlength: 200, default: '' }, // why it was rejected or cancelled
     priceAtBooking: { type: Number, required: true, min: 1 },
+    // Payment. "cash" = pay the provider directly after the job. "transfer" = Easypaisa, JazzCash or bank transfer.
+    paymentMethod: { type: String, enum: ['cash', 'transfer'], default: 'cash' },
+    paymentStatus: { type: String, enum: ['unpaid', 'submitted', 'paid'], default: 'unpaid' },
+    paymentReference: { type: String, trim: true, maxlength: 60, default: '' }, // transaction id typed by the customer
+    paymentNote: { type: String, trim: true, maxlength: 200, default: '' }, // why the provider rejected a payment
+    paidAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

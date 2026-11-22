@@ -1,19 +1,30 @@
 import { NavLink } from 'react-router-dom';
-import { CalendarCheck, ChartPie, Heart, LayoutDashboard, MessageSquare, Search, SquarePlus, X } from 'lucide-react';
+import { Briefcase, CalendarCheck, CalendarClock, Heart, LayoutDashboard, LogIn, MessageSquare, Search, ShieldCheck, UserPlus, Wallet, X } from 'lucide-react';
 
-// `soon: true` items are greyed out until the matching feature exists (Week 3 and later).
-const ITEMS = [
-  { label: 'Dashboard', icon: LayoutDashboard, soon: true },
-  { label: 'Find services', icon: Search, to: '/', end: true },
-  { label: 'Add a service', icon: SquarePlus, to: '/services/new' },
-  { label: 'Bookings', icon: CalendarCheck, soon: true },
-  { label: 'Messages', icon: MessageSquare, soon: true },
-  { label: 'Statistics', icon: ChartPie, soon: true },
-];
+import { useAuth } from '../hooks/useAuth.js';
+
+// The menu depends on who is logged in. `soon: true` items are greyed out.
+const FIND = { label: 'Find services', icon: Search, to: '/', end: true };
+const MENUS = {
+  guest: [FIND, { label: 'Log in', icon: LogIn, to: '/login' }, { label: 'Register', icon: UserPlus, to: '/register' }],
+  customer: [{ label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard' }, FIND, { label: 'My bookings', icon: CalendarCheck, to: '/bookings' }, { label: 'Messages', icon: MessageSquare, to: '/messages' }],
+  provider: [
+    { label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard' },
+    { label: 'Booking requests', icon: CalendarCheck, to: '/bookings' },
+    { label: 'My services', icon: Briefcase, to: '/my/services' },
+    { label: 'Profile & payments', icon: Wallet, to: '/my/profile' },
+    { label: 'Availability', icon: CalendarClock, to: '/my/availability' },
+    FIND,
+    { label: 'Messages', icon: MessageSquare, to: '/messages' },
+  ],
+  admin: [{ label: 'Admin dashboard', icon: ShieldCheck, to: '/admin' }, FIND],
+};
 
 const itemBase = 'relative flex items-center gap-4 rounded-l-full py-3.5 pl-6 pr-4 text-sm font-medium transition-colors';
 
 export default function Sidebar({ open, onClose }) {
+  const { user } = useAuth();
+  const items = MENUS[user?.role || 'guest'];
   return (
     <aside
       className={`fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col overflow-hidden bg-brand-700 py-6 text-white transition-transform lg:static lg:translate-x-0 ${
@@ -31,7 +42,7 @@ export default function Sidebar({ open, onClose }) {
       </div>
 
       <nav className="mt-12 flex-1 space-y-1 pl-4" aria-label="Main">
-        {ITEMS.map(({ label, icon: Icon, to, end, soon }) =>
+        {items.map(({ label, icon: Icon, to, end, soon }) =>
           soon ? (
             <span key={label} aria-disabled="true" title="Coming in a later week" className={`${itemBase} cursor-not-allowed text-white/40`}>
               <Icon size={20} />

@@ -1,20 +1,35 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Menu, MessageCircle, Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { LogOut, Menu, MessageCircle, Search } from 'lucide-react';
+import NotificationBell from './NotificationBell.jsx';
+import { useAuth } from '../hooks/useAuth.js';
+import { useRealtime } from '../hooks/useRealtime.js';
 
 function titleFor(pathname) {
   if (pathname === '/') return 'Find services';
   if (pathname === '/services/new') return 'Add a service';
+  if (pathname === '/login') return 'Log in';
+  if (pathname === '/register') return 'Register';
+  if (pathname === '/dashboard') return 'Dashboard';
+  if (pathname === '/bookings') return 'Bookings';
+  if (pathname === '/my/services') return 'My services';
+  if (pathname === '/my/availability') return 'Availability';
+  if (pathname === '/my/profile') return 'Profile & payments';
+  if (pathname.startsWith('/messages')) return 'Messages';
+  if (pathname === '/admin') return 'Admin';
+  if (pathname === '/forbidden') return 'No access';
   if (pathname.startsWith('/providers/')) return 'Provider';
   if (/^\/services\/.+\/edit$/.test(pathname)) return 'Edit service';
   return 'ServiceLink';
 }
 
-// Week 3: replace the guest block with the logged-in user's name and role,
-// and the counts on the two bells with real notifications.
+// The two bells are decorative; real notifications are a future feature.
 export default function Topbar({ onMenu }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { unreadMessages } = useRealtime();
   const [q, setQ] = useState('');
 
   function submit(e) {
@@ -42,21 +57,27 @@ export default function Topbar({ onMenu }) {
         <Search size={18} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted" />
       </form>
 
-      <button aria-label="Messages" className="icon-btn hidden sm:grid">
-        <MessageCircle size={20} />
-        <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand-700 px-1 text-[10px] font-semibold text-white">3</span>
-      </button>
-      <button aria-label="Notifications" className="icon-btn hidden sm:grid">
-        <Bell size={20} />
-        <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand-700 px-1 text-[10px] font-semibold text-white">5</span>
-      </button>
+      {user && user.role !== 'admin' && (
+        <Link to="/messages" aria-label={`Messages${unreadMessages ? `, ${unreadMessages} unread` : ''}`} className="icon-btn">
+          <MessageCircle size={20} />
+          {unreadMessages > 0 && (
+            <span data-testid="message-badge" className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand-700 px-1 text-[10px] font-semibold text-white">{unreadMessages > 9 ? '9+' : unreadMessages}</span>
+          )}
+        </Link>
+      )}
+      {user && <NotificationBell />}
 
       <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">G</span>
+        <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">{(user?.name || 'G')[0].toUpperCase()}</span>
         <div className="hidden leading-tight md:block">
-          <p className="text-sm font-semibold">Guest</p>
-          <p className="text-xs text-muted">Visitor</p>
+          <p className="text-sm font-semibold">{user?.name || 'Guest'}</p>
+          <p className="text-xs capitalize text-muted">{user?.role || 'Visitor'}</p>
         </div>
+        {user && (
+          <button onClick={() => { logout(); navigate('/login'); }} aria-label="Log out" title="Log out" className="icon-btn">
+            <LogOut size={18} />
+          </button>
+        )}
       </div>
     </header>
   );

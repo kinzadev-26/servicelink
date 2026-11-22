@@ -17,7 +17,7 @@ export default function EditService() {
     // Only the fields the API allows to change
     const { category, title, description, price, durationMinutes } = values;
     await updateService(id, { category, title, description, price, durationMinutes });
-    navigate(`/providers/${service.provider._id}`);
+    navigate('/my/services');
   }
 
   return (

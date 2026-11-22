@@ -1,6 +1,13 @@
+import { AuthProvider } from './context/AuthContext.jsx';
+import { RealtimeProvider } from './context/RealtimeContext.jsx';
 import AppRoutes from './routes/AppRoutes.jsx';
 
-// Week 3: wrap <AppRoutes /> in <AuthProvider> here.
 export default function App() {
-  return <AppRoutes />;
+  return (
+    <AuthProvider>
+      <RealtimeProvider>
+        <AppRoutes />
+      </RealtimeProvider>
+    </AuthProvider>
+  );
 }

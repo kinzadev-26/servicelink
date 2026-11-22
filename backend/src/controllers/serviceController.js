@@ -57,29 +57,39 @@ export const getService = asyncHandler(async (req, res) => {
   sendSuccess(res, service);
 });
 
-// POST /api/services  (Week 2: provider id in body; Week 3: from the JWT)
-export const createService = asyncHandler(async (req, res) => {
-  const { provider, category, title, description, price, durationMinutes } = req.body;
+// GET /api/services/mine  (all of the logged-in provider's services, including inactive ones)
+export const listMyServices = asyncHandler(async (req, res) => {
+  const services = await populateService(Service.find({ provider: req.provider._id }).sort({ createdAt: -1 }));
+  sendSuccess(res, services);
+});
 
-  const providerDoc = await Provider.findById(provider);
-  if (!providerDoc) throw new AppError('Provider not found', 404);
-  if (providerDoc.approvalStatus !== 'approved') throw new AppError('Provider is not approved yet', 403);
+// POST /api/services  (the provider comes from the JWT, not the request body)
+export const createService = asyncHandler(async (req, res) => {
+  const { category, title, description, price, durationMinutes } = req.body;
+
+  if (req.provider.approvalStatus !== 'approved') throw new AppError('Your profile must be approved before you can add services', 403);
   if (!(await Category.exists({ _id: category }))) throw new AppError('Category not found', 404);
 
-  const service = await Service.create({ provider, category, title, description, price, durationMinutes });
+  const service = await Service.create({ provider: req.provider._id, category, title, description, price, durationMinutes });
   sendSuccess(res, await populateService(Service.findById(service._id)), { status: 201, message: 'Service created' });
 });
 
-// PUT /api/services/:id  (only these fields can change)
-export const updateService = asyncHandler(async (req, res) => {
+// Loads a service and makes sure it belongs to the logged-in provider (ownership check).
+async function findOwnedService(req) {
   const service = await Service.findById(req.params.id);
   if (!service) throw new AppError('Service not found', 404);
+  if (!service.provider.equals(req.provider._id)) throw new AppError('You can only change your own services', 403);
+  return service;
+}
 
-  for (const field of ['category', 'title', 'description', 'price', 'durationMinutes', 'isActive']) {
-    if (req.body[field] !== undefined) service[field] = req.body[field];
-  }
+// PUT /api/services/:id  (only these fields can change)
+export const updateService = asyncHandler(async (req, res) => {
+  const service = await findOwnedService(req);
   if (req.body.category && !(await Category.exists({ _id: req.body.category }))) {
     throw new AppError('Category not found', 404);
+  }
+  for (const field of ['category', 'title', 'description', 'price', 'durationMinutes', 'isActive']) {
+    if (req.body[field] !== undefined) service[field] = req.body[field];
   }
   await service.save();
   sendSuccess(res, await populateService(Service.findById(service._id)), { message: 'Service updated' });
@@ -87,8 +97,7 @@ export const updateService = asyncHandler(async (req, res) => {
 
 // DELETE /api/services/:id  (SRV-2: not while active bookings exist)
 export const deleteService = asyncHandler(async (req, res) => {
-  const service = await Service.findById(req.params.id);
-  if (!service) throw new AppError('Service not found', 404);
+  const service = await findOwnedService(req);
 
   const hasBookings = await Booking.exists({ service: service._id, status: { $in: ACTIVE_STATUSES } });
   if (hasBookings) {

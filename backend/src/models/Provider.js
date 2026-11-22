@@ -10,6 +10,12 @@ const providerSchema = new mongoose.Schema(
     photoUrl: { type: String, default: '' },
     approvalStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     rejectionReason: { type: String, default: '' },
+    // Where customers should send money for "transfer" bookings (all optional)
+    paymentAccounts: {
+      easypaisa: { type: String, trim: true, maxlength: 40, default: '' },
+      jazzcash: { type: String, trim: true, maxlength: 40, default: '' },
+      bank: { type: String, trim: true, maxlength: 120, default: '' }, // e.g. "Meezan Bank, Title, IBAN"
+    },
     isPaused: { type: Boolean, default: false },
     avgRating: { type: Number, min: 0, max: 5, default: 0 },
     reviewCount: { type: Number, min: 0, default: 0 },
