@@ -37,8 +37,8 @@ AUREX Full-Stack Engineering Internship, Month 3. **Status: Week 4 (deployment, 
 | Hosting | Vercel (frontend), Render / Railway (backend, full features) or Vercel (backend, REST only), MongoDB Atlas |
 
 
-## Database (ER diagram)
-
+### Database (ER diagram)
+ 
 ```mermaid
 erDiagram
   USER ||--o| PROVIDER : "is"
@@ -52,10 +52,35 @@ erDiagram
   USER ||--o{ CONVERSATION : "takes part in"
   CONVERSATION ||--o{ MESSAGE : contains
   USER ||--o{ NOTIFICATION : receives
-  USER { string name string email string passwordHash string role bool isActive }
-  PROVIDER { string city string bio number avgRating number reviewCount string approvalStatus object paymentAccounts }
-  BOOKING { string date string startTime string endTime string status string paymentMethod string paymentStatus string paymentReference number priceAtBooking }
-  MESSAGE { string text date readAt }
+  USER {
+    string name
+    string email
+    string passwordHash
+    string role
+    boolean isActive
+  }
+  PROVIDER {
+    string city
+    string bio
+    number avgRating
+    number reviewCount
+    string approvalStatus
+    object paymentAccounts
+  }
+  BOOKING {
+    string date
+    string startTime
+    string endTime
+    string status
+    string paymentMethod
+    string paymentStatus
+    string paymentReference
+    number priceAtBooking
+  }
+  MESSAGE {
+    string text
+    date readAt
+  }
 ```
 
 ## Roles and access
@@ -126,10 +151,5 @@ backend/tests    Jest tests
 backend/scripts  smokeTest.js (deployed-API check)
 frontend/src     components, pages, routes, context, hooks, services
 docs/            API.md, DEPLOYMENT.md, TESTING.md, PRESENTATION.md, postman/, screenshots/
-render.yaml      Render Blueprint for the backend
-backend/railway.json, backend/vercel.json, backend/api/index.js, frontend/vercel.json   hosting config
+backend/vercel.json, backend/api/index.js, frontend/vercel.json   hosting config
 ```
-
-## License
-
-MIT, see [LICENSE](LICENSE).
